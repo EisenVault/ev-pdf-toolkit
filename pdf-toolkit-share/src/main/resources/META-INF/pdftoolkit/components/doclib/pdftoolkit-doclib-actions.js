@@ -268,7 +268,8 @@ PDFToolkit.Util = {};
 		{
 			var config = that.options.showSelectValues;
 			var htmlId = that.options.htmlId
-			var select = event.srcElement;
+			//var select = event.srcElement;
+			var select = YAHOO.util.Dom.get(this.id);
 			
 			that.toggleDependentFields(config, select, htmlId);
 		},

@@ -33,4 +33,5 @@ var SelectPage = new PDFToolkit.SelectPage("${fieldHtmlId}").setOptions(
 	      }).setMessages(
 	         {}
 	      );
-//]]></script>
+//]]>
+</script>

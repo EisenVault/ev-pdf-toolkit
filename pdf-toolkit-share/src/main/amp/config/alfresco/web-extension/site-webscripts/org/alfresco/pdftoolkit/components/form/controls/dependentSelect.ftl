@@ -78,4 +78,5 @@ var DependentSelect = new PDFToolkit.DependentSelect("${fieldHtmlId}").setOption
 	      }).setMessages(
 	         {}
 	      );
-//]]></script>
+//]]>
+</script>

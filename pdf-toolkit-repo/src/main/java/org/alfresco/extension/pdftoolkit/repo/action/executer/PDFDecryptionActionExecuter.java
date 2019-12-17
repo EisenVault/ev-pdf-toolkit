@@ -11,8 +11,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 
 public class PDFDecryptionActionExecuter extends BasePDFActionExecuter 
 {
-
-    /**
+	/**
      * Action constants
      */
     public static final String            NAME                                = "pdf-decryption";

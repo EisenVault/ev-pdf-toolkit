@@ -73,6 +73,7 @@ import org.alfresco.service.cmr.version.Version;
 import org.alfresco.repo.version.VersionModel;
 import org.alfresco.service.cmr.version.VersionType;
 import org.alfresco.service.cmr.coci.CheckOutCheckInService;
+import com.itextpdf.text.pdf.PdfGState;
 
 public class PDFToolkitServiceImpl extends PDFToolkitConstants implements PDFToolkitService 
 {
@@ -287,6 +288,7 @@ public class PDFToolkitServiceImpl extends PDFToolkitConstants implements PDFToo
             	ns.addAspect(destinationNode, PDFToolkitModel.ASPECT_ENCRYPTED, new HashMap<QName, Serializable>());
             	ns.setProperty(destinationNode, PDFToolkitModel.PROP_ENCRYPTIONDATE, new java.util.Date());
             	ns.setProperty(destinationNode, PDFToolkitModel.PROP_ENCRYPTEDBY, AuthenticationUtil.getRunAsUser());
+            	ns.setProperty(destinationNode, PDFToolkitModel.PROP_AUTO_VERSION_PROPS, false);
 		//ns.setProperty(destinationNode, PDFToolkitModel.PROP_VERSION_TYPE, VersionType.MAJOR);
             }
             
@@ -371,6 +373,7 @@ public class PDFToolkitServiceImpl extends PDFToolkitConstants implements PDFToo
             if(useEncryptionAspect)
             {
             	ns.removeAspect(destinationNode, PDFToolkitModel.ASPECT_ENCRYPTED);
+            	ns.setProperty(destinationNode, PDFToolkitModel.PROP_AUTO_VERSION_PROPS, true);
             }
         }
         catch (IOException e)
@@ -407,7 +410,6 @@ public class PDFToolkitServiceImpl extends PDFToolkitConstants implements PDFToo
                 }
             }
         }
-        
         return destinationNode;
 	}
 	
@@ -1662,8 +1664,12 @@ public class PDFToolkitServiceImpl extends PDFToolkitConstants implements PDFToo
 
             // get the PDF pages and position
             String pages = (String)options.get(PARAM_PAGE);
-            String position = (String)options.get(PARAM_POSITION);
-            String depth = (String)options.get(PARAM_WATERMARK_DEPTH);
+            //Start EisenVault Customization - Make watermark center only - Sumit
+	    //String position = (String)options.get(PARAM_POSITION);
+            String position = POSITION_CENTER;
+	    //End EisenVault Customization
+            //String depth = (String)options.get(PARAM_WATERMARK_DEPTH);
+            String depth = DEPTH_OVER;
             Boolean inplace = true;
 
             // get the manual positioning options (if provided)
@@ -1718,6 +1724,12 @@ public class PDFToolkitServiceImpl extends PDFToolkitConstants implements PDFToo
                 {
                     pcb = stamp.getUnderContent(i);
                 }
+                
+                PdfGState gstate = new PdfGState(); 
+                gstate.setFillOpacity(0.3f); 
+                gstate.setStrokeOpacity(0.3f);
+                pcb.saveState(); 
+                pcb.setGState(gstate);
 
                 // only apply stamp to requested pages
                 if (checkPage(pages, i, numpages))
@@ -1795,7 +1807,9 @@ public class PDFToolkitServiceImpl extends PDFToolkitConstants implements PDFToo
     private NodeRef textAction(Map<String, Serializable> options, NodeRef targetNodeRef, ContentReader actionedUponContentReader)
     {
 
-        PdfStamper stamp = null;
+	options.put(PARAM_DESTINATION_NAME, null);
+        options.put(PARAM_DESTINATION_FOLDER, null);        
+	PdfStamper stamp = null;
         File tempDir = null;
         ContentWriter writer = null;
         String watermarkText;
@@ -1814,8 +1828,12 @@ public class PDFToolkitServiceImpl extends PDFToolkitConstants implements PDFToo
 
             // get the PDF pages and position
             String pages = (String)options.get(PARAM_PAGE);
-            String position = (String)options.get(PARAM_POSITION);
-            String depth = (String)options.get(PARAM_WATERMARK_DEPTH);
+            //Start EisenVault Customization - Make watermark center only - Sumit
+	    //String position = (String)options.get(PARAM_POSITION);
+            String position = POSITION_CENTER;
+	    //End EisenVault Customization
+            //String depth = (String)options.get(PARAM_WATERMARK_DEPTH);
+            String depth = DEPTH_OVER;
             int locationX = getInteger(options.get(PARAM_LOCATION_X));
             int locationY = getInteger(options.get(PARAM_LOCATION_Y));
             Boolean inplace = true;
@@ -1840,6 +1858,7 @@ public class PDFToolkitServiceImpl extends PDFToolkitConstants implements PDFToo
 
             // stamp each page
             int numpages = reader.getNumberOfPages();
+            Rectangle pageRectangle = reader.getPageSize(1);
             for (int i = 1; i <= numpages; i++)
             {
                 Rectangle r = reader.getPageSizeWithRotation(i);
@@ -1854,6 +1873,12 @@ public class PDFToolkitServiceImpl extends PDFToolkitConstants implements PDFToo
                 {
                     pcb = stamp.getUnderContent(i);
                 }
+                
+                PdfGState gstate = new PdfGState(); 
+                gstate.setFillOpacity(0.3f); 
+                gstate.setStrokeOpacity(0.3f); 
+                pcb.saveState(); 
+                pcb.setGState(gstate);
 
                 // set the font and size
                 float size = Float.parseFloat((String)options.get(PARAM_WATERMARK_SIZE));
@@ -1862,12 +1887,11 @@ public class PDFToolkitServiceImpl extends PDFToolkitConstants implements PDFToo
                 // only apply stamp to requested pages
                 if (checkPage(pages, i, numpages))
                 {
-                    writeAlignedText(pcb, r, tokens, size, position, locationX, locationY);
+                    writeAlignedText(pcb, r, tokens, size, position, locationX, locationY, pageRectangle);
                 }
             }
 
-            stamp.close();
-
+            stamp.close();	
             String fileName = getFilename(options, targetNodeRef);
             
             // Get a writer and prep it for putting it back into the repo
@@ -1933,7 +1957,7 @@ public class PDFToolkitServiceImpl extends PDFToolkitConstants implements PDFToo
      * @param position
      */
     private void writeAlignedText(PdfContentByte pcb, Rectangle r, Vector<String> tokens, float size, 
-    		String position, int locationX, int locationY)
+    		String position, int locationX, int locationY, Rectangle pageRectangle)
     {
         // get the dimensions of our 'rectangle' for text
         float height = size * tokens.size();
@@ -1983,10 +2007,11 @@ public class PDFToolkitServiceImpl extends PDFToolkitConstants implements PDFToo
 
         // apply text to PDF
         pcb.beginText();
-
+        System.out.println("Page width: "+ r.getWidth() +" Page Height: "+r.getHeight());
         for (int t = 0; t < tokens.size(); t++)
         {
-            pcb.showTextAligned(PdfContentByte.ALIGN_CENTER, tokens.get(t), centerX, startY - (size * t), 0);
+            pcb.showTextAligned(PdfContentByte.ALIGN_CENTER, tokens.get(t), centerX, startY - (size * t), 45);
+            //pcb.showTextAligned(PdfContentByte.ALIGN_CENTER, tokens.get(t), width/2+50, height/2+50, 45);
         }
 
         pcb.endText();

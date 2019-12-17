@@ -37,7 +37,7 @@
 					</actionGroups>
 				</config>
 			</configurations>
-		</module>
+		</module>-->
 		<module>
 			<id>PDF Toolkit Actions UI - Watermark</id>
 			<description>Expose the watermark action doclib action UI</description>
@@ -73,7 +73,7 @@
 					</actionGroups>
 				</config>
 			</configurations>
-		</module>-->
+		</module>
 		<module>
 			<id>PDF Toolkit Actions UI - Append</id>
 			<description>Expose the append action doclib action UI</description>

@@ -6,7 +6,7 @@ public interface PDFToolkitModel
 {
 	//namespace
 	static final String PDFTOOLKIT_MODEL_1_0_URI = "http://www.alfresco.com/model/pdftoolkit/1.0";
-	//static final String PDFTOOLKIT_MODEL_base_1_0_URI = "http://www.alfresco.org/model/content/1.0";
+	static final String PDFTOOLKIT_MODEL_base_1_0_URI = "http://www.alfresco.org/model/content/1.0";
 	
 	//signed aspect and properties
 	static final QName ASPECT_SIGNED = QName.createQName(PDFTOOLKIT_MODEL_1_0_URI, "signed");
@@ -21,5 +21,7 @@ public interface PDFToolkitModel
 	static final QName PROP_ENCRYPTEDBY = QName.createQName(PDFTOOLKIT_MODEL_1_0_URI, "encryptedby");
 	//static final QName PROP_VERSION_TYPE = QName.createQName(PDFTOOLKIT_MODEL_base_1_0_URI, "versionType");
 	//static final QName PROP_DESCRIPTION = QName.createQName(PDFTOOLKIT_MODEL_base_1_0_URI, "versionLabel");
+	
+	static final QName PROP_AUTO_VERSION_PROPS = QName.createQName(PDFTOOLKIT_MODEL_base_1_0_URI, "autoVersion");
 
 }

@@ -52,7 +52,7 @@
 	</bean>
 
 	<!-- pdfwatermark -->
-	<!--<bean id="pdf-watermark"
+	<bean id="pdf-watermark"
 		class="org.alfresco.extension.pdftoolkit.repo.action.executer.PDFWatermarkActionExecuter"
 		parent="org.alfresco.extension.pdf-toolkit-action" depends-on="pdftoolkit-messages">
 		<property name="positionConstraint">
@@ -73,7 +73,7 @@
 		<property name="fontSizeConstraint">
 			<ref bean="pdfc-fontsize"/>
 		</property>
-	</bean>-->
+	</bean>
 	
 	<!-- pdfencryption -->
 	<bean id="pdf-encryption"
